@@ -2,7 +2,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.repositories import analysis_repository
 from app.schemas.email_analysis import (
     AnalysisResult,
     CulturalRisk,
@@ -17,11 +16,6 @@ from app.services.llm_service import LLMAnalysisError, LLMNotConfiguredError
 
 
 client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def isolate_analysis_data(monkeypatch):
-    monkeypatch.setattr(analysis_repository, "_ANALYSES", {})
 
 
 @pytest.fixture

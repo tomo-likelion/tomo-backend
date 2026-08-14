@@ -1,20 +1,9 @@
-import pytest
 from fastapi.testclient import TestClient
 
-from app.repositories import recipient_repository
 from app.main import app
 
 
 client = TestClient(app)
-
-
-@pytest.fixture(autouse=True)
-def isolate_recipient_data(monkeypatch):
-    monkeypatch.setattr(
-        recipient_repository,
-        "_RECIPIENTS",
-        recipient_repository._RECIPIENTS.copy(),
-    )
 
 
 def test_create_recipient_registers_new_profile():
