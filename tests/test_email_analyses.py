@@ -93,6 +93,80 @@ def test_create_email_analysis_returns_cultural_risk_and_recommendation(
     assert result["createdAt"]
 
 
+def test_get_email_analysis_returns_saved_detail(
+    monkeypatch,
+    cultural_analysis_result,
+):
+    monkeypatch.setattr(
+        analysis_service,
+        "analyze_email_with_llm",
+        lambda request, recipient: cultural_analysis_result,
+    )
+    create_response = client.post(
+        "/api/v1/email-analyses",
+        json={
+            "recipientEmail": "tanaka@abc.jp",
+            "subject": "디자인 수정 요청",
+            "body": "왜 이렇게 작업하셨는지 이해가 안 됩니다.",
+        },
+    )
+
+    response = client.get(
+        f"/api/v1/email-analyses/{create_response.json()['analysisId']}"
+    )
+
+    assert response.status_code == 200
+    result = response.json()
+    assert result["recipientEmail"] == "tanaka@abc.jp"
+    assert result["originalSubject"] == "디자인 수정 요청"
+    assert result["originalBody"] == "왜 이렇게 작업하셨는지 이해가 안 됩니다."
+    assert result["riskResult"]["risks"][0]["type"] == (
+        "FACE_THREATENING_FEEDBACK"
+    )
+    assert result["rewrittenSubject"] == "デザイン内容のご確認と修正のお願い"
+
+
+def test_get_email_analysis_returns_404_for_unknown_id():
+    response = client.get("/api/v1/email-analyses/999")
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "code": "EMAIL_ANALYSIS_NOT_FOUND",
+        "message": "이메일 분석 결과를 찾을 수 없습니다.",
+    }
+
+
+def test_get_email_analyses_returns_newest_first(
+    monkeypatch,
+    cultural_analysis_result,
+):
+    monkeypatch.setattr(
+        analysis_service,
+        "analyze_email_with_llm",
+        lambda request, recipient: cultural_analysis_result,
+    )
+
+    for subject in ["첫 번째 분석", "두 번째 분석"]:
+        response = client.post(
+            "/api/v1/email-analyses",
+            json={
+                "recipientEmail": "tanaka@abc.jp",
+                "subject": subject,
+                "body": "다시 수정해서 보내주세요.",
+            },
+        )
+        assert response.status_code == 201
+
+    response = client.get("/api/v1/email-analyses")
+
+    assert response.status_code == 200
+    assert [result["analysisId"] for result in response.json()] == [2, 1]
+    assert [result["originalSubject"] for result in response.json()] == [
+        "두 번째 분석",
+        "첫 번째 분석",
+    ]
+
+
 def test_create_email_analysis_returns_404_for_unknown_recipient(monkeypatch):
     def fail_if_called(request, recipient):
         pytest.fail("LLM should not be called for an unknown recipient")
