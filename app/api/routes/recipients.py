@@ -2,13 +2,35 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from app.schemas.recipient import (
+    RecipientAlreadyExistsResponse,
+    RecipientCreateRequest,
     RecipientNotFoundResponse,
     RecipientProfileResponse,
 )
-from app.services.recipient_service import get_recipient_by_email
+from app.services.recipient_service import (
+    RecipientAlreadyExistsError,
+    create_recipient,
+    get_recipient_by_email,
+)
 
 
 router = APIRouter(prefix="/api/v1/recipients", tags=["recipients"])
+
+
+@router.post(
+    "",
+    response_model=RecipientProfileResponse,
+    status_code=201,
+    responses={409: {"model": RecipientAlreadyExistsResponse}},
+)
+def register_recipient(
+    request: RecipientCreateRequest,
+) -> RecipientProfileResponse | JSONResponse:
+    try:
+        return create_recipient(request)
+    except RecipientAlreadyExistsError:
+        error = RecipientAlreadyExistsResponse()
+        return JSONResponse(status_code=409, content=error.model_dump())
 
 
 @router.get(

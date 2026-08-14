@@ -1,4 +1,8 @@
-from app.schemas.recipient import RecipientProfileResponse, Relationship
+from app.schemas.recipient import (
+    RecipientCreateRequest,
+    RecipientProfileResponse,
+    Relationship,
+)
 
 
 _RECIPIENTS = {
@@ -25,3 +29,13 @@ _RECIPIENTS = {
 
 def find_recipient_by_email(email: str) -> RecipientProfileResponse | None:
     return _RECIPIENTS.get(email)
+
+
+def save_recipient(recipient: RecipientCreateRequest) -> RecipientProfileResponse:
+    next_id = max(profile.id for profile in _RECIPIENTS.values()) + 1
+    saved_recipient = RecipientProfileResponse(
+        id=next_id,
+        **recipient.model_dump(),
+    )
+    _RECIPIENTS[str(saved_recipient.email)] = saved_recipient
+    return saved_recipient
