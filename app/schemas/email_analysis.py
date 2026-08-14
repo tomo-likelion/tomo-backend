@@ -87,6 +87,42 @@ class EmailAnalysisCreateResponse(BaseModel):
     created_at: datetime = Field(alias="createdAt")
 
 
+class AnalysisRiskResult(BaseModel):
+    risks: list[CulturalRisk]
+
+
+class EmailAnalysisDetailResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
+
+    analysis_id: int = Field(alias="analysisId")
+    recipient_email: EmailStr = Field(alias="recipientEmail")
+    original_subject: str = Field(alias="originalSubject")
+    original_body: str = Field(alias="originalBody")
+    intent: EmailIntent
+    request_summary: str = Field(alias="requestSummary")
+    risk_score: int = Field(alias="riskScore")
+    risk_result: AnalysisRiskResult = Field(alias="riskResult")
+    rewritten_subject: str = Field(alias="rewrittenSubject")
+    rewritten_body: str = Field(alias="rewrittenBody")
+    created_at: datetime = Field(alias="createdAt")
+
+
+class EmailAnalysisSummaryResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
+
+    analysis_id: int = Field(alias="analysisId")
+    recipient_email: EmailStr = Field(alias="recipientEmail")
+    original_subject: str = Field(alias="originalSubject")
+    intent: EmailIntent
+    risk_score: int = Field(alias="riskScore")
+    created_at: datetime = Field(alias="createdAt")
+
+
+class EmailAnalysisNotFoundResponse(BaseModel):
+    code: str = "EMAIL_ANALYSIS_NOT_FOUND"
+    message: str = "이메일 분석 결과를 찾을 수 없습니다."
+
+
 class EmailAnalysisFailedResponse(BaseModel):
     code: str = "EMAIL_ANALYSIS_FAILED"
     message: str = "이메일 분석에 실패했습니다."
