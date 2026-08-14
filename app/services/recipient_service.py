@@ -1,4 +1,5 @@
 from app.repositories.recipient_repository import (
+    find_all_recipients,
     find_recipient_by_email,
     save_recipient,
 )
@@ -12,6 +13,10 @@ class RecipientAlreadyExistsError(Exception):
 def get_recipient_by_email(email: str) -> RecipientProfileResponse | None:
     normalized_email = email.strip().lower()
     return find_recipient_by_email(normalized_email)
+
+
+def get_all_recipients() -> list[RecipientProfileResponse]:
+    return find_all_recipients()
 
 
 def create_recipient(recipient: RecipientCreateRequest) -> RecipientProfileResponse:

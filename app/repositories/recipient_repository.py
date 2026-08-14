@@ -31,6 +31,10 @@ def find_recipient_by_email(email: str) -> RecipientProfileResponse | None:
     return _RECIPIENTS.get(email)
 
 
+def find_all_recipients() -> list[RecipientProfileResponse]:
+    return sorted(_RECIPIENTS.values(), key=lambda profile: profile.id)
+
+
 def save_recipient(recipient: RecipientCreateRequest) -> RecipientProfileResponse:
     next_id = max(profile.id for profile in _RECIPIENTS.values()) + 1
     saved_recipient = RecipientProfileResponse(

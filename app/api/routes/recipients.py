@@ -10,6 +10,7 @@ from app.schemas.recipient import (
 from app.services.recipient_service import (
     RecipientAlreadyExistsError,
     create_recipient,
+    get_all_recipients,
     get_recipient_by_email,
 )
 
@@ -31,6 +32,11 @@ def register_recipient(
     except RecipientAlreadyExistsError:
         error = RecipientAlreadyExistsResponse()
         return JSONResponse(status_code=409, content=error.model_dump())
+
+
+@router.get("", response_model=list[RecipientProfileResponse])
+def get_recipients() -> list[RecipientProfileResponse]:
+    return get_all_recipients()
 
 
 @router.get(
