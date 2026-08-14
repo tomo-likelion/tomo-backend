@@ -25,6 +25,18 @@ class EmailAnalysisRecord:
 _ANALYSES: dict[int, EmailAnalysisRecord] = {}
 
 
+def find_analysis_by_id(analysis_id: int) -> EmailAnalysisRecord | None:
+    return _ANALYSES.get(analysis_id)
+
+
+def find_all_analyses() -> list[EmailAnalysisRecord]:
+    return sorted(
+        _ANALYSES.values(),
+        key=lambda record: record.analysis_id,
+        reverse=True,
+    )
+
+
 def save_analysis(
     request: EmailAnalysisCreateRequest,
     recipient: RecipientProfileResponse,
