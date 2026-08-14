@@ -82,6 +82,16 @@ def test_create_recipient_returns_422_for_invalid_email():
     assert response.status_code == 422
 
 
+def test_get_recipients_returns_all_profiles_in_id_order():
+    response = client.get("/api/v1/recipients")
+
+    assert response.status_code == 200
+    assert [recipient["email"] for recipient in response.json()] == [
+        "tanaka@abc.jp",
+        "alex@example.com",
+    ]
+
+
 def test_get_recipient_returns_registered_profile():
     response = client.get("/api/v1/recipients/tanaka@abc.jp")
 
