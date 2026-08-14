@@ -1,45 +1,38 @@
-from app.schemas.recipient import (
-    RecipientCreateRequest,
-    RecipientProfileResponse,
-    Relationship,
-)
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.models import RecipientProfile
+from app.schemas.recipient import RecipientCreateRequest
 
 
-_RECIPIENTS = {
-    "tanaka@abc.jp": RecipientProfileResponse(
-        id=1,
-        email="tanaka@abc.jp",
-        name="Tanaka",
-        country_code="JP",
-        language_code="ja",
-        relationship=Relationship.PARTNER,
-        organization="ABC Design",
-    ),
-    "alex@example.com": RecipientProfileResponse(
-        id=2,
-        email="alex@example.com",
-        name="Alex",
-        country_code="US",
-        language_code="en",
-        relationship=Relationship.CLIENT,
-        organization="Example Inc.",
-    ),
-}
-
-
-def find_recipient_by_email(email: str) -> RecipientProfileResponse | None:
-    return _RECIPIENTS.get(email)
-
-
-def find_all_recipients() -> list[RecipientProfileResponse]:
-    return sorted(_RECIPIENTS.values(), key=lambda profile: profile.id)
-
-
-def save_recipient(recipient: RecipientCreateRequest) -> RecipientProfileResponse:
-    next_id = max(profile.id for profile in _RECIPIENTS.values()) + 1
-    saved_recipient = RecipientProfileResponse(
-        id=next_id,
-        **recipient.model_dump(),
+def find_recipient_by_email(
+    db: Session,
+    email: str,
+) -> RecipientProfile | None:
+    return db.scalar(
+        select(RecipientProfile).where(RecipientProfile.email == email)
     )
-    _RECIPIENTS[str(saved_recipient.email)] = saved_recipient
+
+
+def find_all_recipients(db: Session) -> list[RecipientProfile]:
+    return list(
+        db.scalars(select(RecipientProfile).order_by(RecipientProfile.id))
+    )
+
+
+def save_recipient(
+    db: Session,
+    recipient: RecipientCreateRequest,
+) -> RecipientProfile:
+    saved_recipient = RecipientProfile(
+        email=str(recipient.email),
+        name=recipient.name,
+        country_code=recipient.country_code,
+        language_code=recipient.language_code,
+        relationship_type=recipient.relationship.value,
+        organization=recipient.organization,
+    )
+    db.add(saved_recipient)
+    db.commit()
+    db.refresh(saved_recipient)
     return saved_recipient

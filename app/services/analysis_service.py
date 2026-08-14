@@ -1,3 +1,5 @@
+from sqlalchemy.orm import Session
+
 from app.repositories.analysis_repository import (
     EmailAnalysisRecord,
     find_all_analyses,
@@ -24,15 +26,16 @@ class EmailAnalysisNotFoundError(Exception):
 
 
 def create_email_analysis(
+    db: Session,
     request: EmailAnalysisCreateRequest,
 ) -> EmailAnalysisCreateResponse:
-    recipient = get_recipient_by_email(str(request.recipient_email))
+    recipient = get_recipient_by_email(db, str(request.recipient_email))
 
     if recipient is None:
         raise AnalysisRecipientNotFoundError
 
     llm_result = analyze_email_with_llm(request, recipient)
-    record = save_analysis(request, recipient, llm_result)
+    record = save_analysis(db, request, recipient, llm_result)
 
     return EmailAnalysisCreateResponse(
         analysis_id=record.analysis_id,
@@ -43,8 +46,11 @@ def create_email_analysis(
     )
 
 
-def get_email_analysis(analysis_id: int) -> EmailAnalysisDetailResponse:
-    record = find_analysis_by_id(analysis_id)
+def get_email_analysis(
+    db: Session,
+    analysis_id: int,
+) -> EmailAnalysisDetailResponse:
+    record = find_analysis_by_id(db, analysis_id)
 
     if record is None:
         raise EmailAnalysisNotFoundError
@@ -52,8 +58,8 @@ def get_email_analysis(analysis_id: int) -> EmailAnalysisDetailResponse:
     return _to_detail_response(record)
 
 
-def get_email_analyses() -> list[EmailAnalysisSummaryResponse]:
-    return [_to_summary_response(record) for record in find_all_analyses()]
+def get_email_analyses(db: Session) -> list[EmailAnalysisSummaryResponse]:
+    return [_to_summary_response(record) for record in find_all_analyses(db)]
 
 
 def _to_detail_response(record: EmailAnalysisRecord) -> EmailAnalysisDetailResponse:
