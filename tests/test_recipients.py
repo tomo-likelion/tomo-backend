@@ -1,9 +1,85 @@
+import pytest
 from fastapi.testclient import TestClient
 
+from app.repositories import recipient_repository
 from app.main import app
 
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def isolate_recipient_data(monkeypatch):
+    monkeypatch.setattr(
+        recipient_repository,
+        "_RECIPIENTS",
+        recipient_repository._RECIPIENTS.copy(),
+    )
+
+
+def test_create_recipient_registers_new_profile():
+    response = client.post(
+        "/api/v1/recipients",
+        json={
+            "email": "sato@design.jp",
+            "name": "Sato",
+            "countryCode": "JP",
+            "languageCode": "ja",
+            "relationship": "PARTNER",
+            "organization": "Design JP",
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json() == {
+        "id": 3,
+        "email": "sato@design.jp",
+        "name": "Sato",
+        "countryCode": "JP",
+        "languageCode": "ja",
+        "relationship": "PARTNER",
+        "organization": "Design JP",
+    }
+
+    lookup_response = client.get("/api/v1/recipients/sato@design.jp")
+    assert lookup_response.status_code == 200
+    assert lookup_response.json() == response.json()
+
+
+def test_create_recipient_returns_409_for_duplicate_email():
+    response = client.post(
+        "/api/v1/recipients",
+        json={
+            "email": "TANAKA@ABC.JP",
+            "name": "Another Tanaka",
+            "countryCode": "JP",
+            "languageCode": "ja",
+            "relationship": "PARTNER",
+            "organization": "Another Company",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {
+        "code": "RECIPIENT_ALREADY_EXISTS",
+        "message": "이미 등록된 수신자입니다.",
+    }
+
+
+def test_create_recipient_returns_422_for_invalid_email():
+    response = client.post(
+        "/api/v1/recipients",
+        json={
+            "email": "not-an-email",
+            "name": "Invalid Recipient",
+            "countryCode": "JP",
+            "languageCode": "ja",
+            "relationship": "PARTNER",
+            "organization": "Invalid Company",
+        },
+    )
+
+    assert response.status_code == 422
 
 
 def test_get_recipient_returns_registered_profile():
