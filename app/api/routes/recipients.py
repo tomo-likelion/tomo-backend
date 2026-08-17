@@ -17,14 +17,25 @@ from app.services.recipient_service import (
 )
 
 
-router = APIRouter(prefix="/api/v1/recipients", tags=["recipients"])
+router = APIRouter(prefix="/api/v1/recipients", tags=["수신자 관리"])
 
 
 @router.post(
     "",
+    summary="수신자 프로필 등록",
+    description=(
+        "이메일 분석에 사용할 수신자의 기본 정보와 관계 정보를 등록합니다. "
+        "이미 등록된 이메일은 다시 등록할 수 없습니다."
+    ),
     response_model=RecipientProfileResponse,
     status_code=201,
-    responses={409: {"model": RecipientAlreadyExistsResponse}},
+    response_description="등록된 수신자 프로필",
+    responses={
+        409: {
+            "model": RecipientAlreadyExistsResponse,
+            "description": "동일한 이메일의 수신자가 이미 등록되어 있음",
+        },
+    },
 )
 def register_recipient(
     request: RecipientCreateRequest,
@@ -37,7 +48,13 @@ def register_recipient(
         return JSONResponse(status_code=409, content=error.model_dump())
 
 
-@router.get("", response_model=list[RecipientProfileResponse])
+@router.get(
+    "",
+    summary="수신자 목록 조회",
+    description="현재 등록된 모든 수신자 프로필을 조회합니다.",
+    response_model=list[RecipientProfileResponse],
+    response_description="등록된 수신자 프로필 목록",
+)
 def get_recipients(
     db: Session = Depends(get_db),
 ) -> list[RecipientProfileResponse]:
@@ -46,8 +63,16 @@ def get_recipients(
 
 @router.get(
     "/{email}",
+    summary="수신자 상세 조회",
+    description="이메일 주소로 등록된 수신자 프로필을 조회합니다.",
     response_model=RecipientProfileResponse,
-    responses={404: {"model": RecipientNotFoundResponse}},
+    response_description="조회된 수신자 프로필",
+    responses={
+        404: {
+            "model": RecipientNotFoundResponse,
+            "description": "해당 이메일로 등록된 수신자가 없음",
+        },
+    },
 )
 def get_recipient(
     email: str,
