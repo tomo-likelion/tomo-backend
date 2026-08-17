@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.schemas.email_analysis import (
     EmailAnalysisCreateRequest,
     EmailAnalysisCreateResponse,
@@ -36,9 +38,10 @@ router = APIRouter(prefix="/api/v1/email-analyses", tags=["email-analyses"])
 )
 def analyze_email(
     request: EmailAnalysisCreateRequest,
+    db: Session = Depends(get_db),
 ) -> EmailAnalysisCreateResponse | JSONResponse:
     try:
-        return create_email_analysis(request)
+        return create_email_analysis(db, request)
     except AnalysisRecipientNotFoundError:
         error = RecipientNotFoundResponse()
         return JSONResponse(status_code=404, content=error.model_dump())
@@ -51,8 +54,10 @@ def analyze_email(
 
 
 @router.get("", response_model=list[EmailAnalysisSummaryResponse])
-def list_email_analyses() -> list[EmailAnalysisSummaryResponse]:
-    return get_email_analyses()
+def list_email_analyses(
+    db: Session = Depends(get_db),
+) -> list[EmailAnalysisSummaryResponse]:
+    return get_email_analyses(db)
 
 
 @router.get(
@@ -62,9 +67,10 @@ def list_email_analyses() -> list[EmailAnalysisSummaryResponse]:
 )
 def get_email_analysis_by_id(
     analysis_id: int,
+    db: Session = Depends(get_db),
 ) -> EmailAnalysisDetailResponse | JSONResponse:
     try:
-        return get_email_analysis(analysis_id)
+        return get_email_analysis(db, analysis_id)
     except EmailAnalysisNotFoundError:
         error = EmailAnalysisNotFoundResponse()
         return JSONResponse(status_code=404, content=error.model_dump())

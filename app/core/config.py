@@ -11,6 +11,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    database_url: str = "postgresql+psycopg://tomo:tomo@localhost:5432/tomo"
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5-mini"
 

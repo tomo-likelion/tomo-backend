@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.schemas.recipient import (
     RecipientAlreadyExistsResponse,
     RecipientCreateRequest,
@@ -26,17 +28,20 @@ router = APIRouter(prefix="/api/v1/recipients", tags=["recipients"])
 )
 def register_recipient(
     request: RecipientCreateRequest,
+    db: Session = Depends(get_db),
 ) -> RecipientProfileResponse | JSONResponse:
     try:
-        return create_recipient(request)
+        return create_recipient(db, request)
     except RecipientAlreadyExistsError:
         error = RecipientAlreadyExistsResponse()
         return JSONResponse(status_code=409, content=error.model_dump())
 
 
 @router.get("", response_model=list[RecipientProfileResponse])
-def get_recipients() -> list[RecipientProfileResponse]:
-    return get_all_recipients()
+def get_recipients(
+    db: Session = Depends(get_db),
+) -> list[RecipientProfileResponse]:
+    return get_all_recipients(db)
 
 
 @router.get(
@@ -44,8 +49,11 @@ def get_recipients() -> list[RecipientProfileResponse]:
     response_model=RecipientProfileResponse,
     responses={404: {"model": RecipientNotFoundResponse}},
 )
-def get_recipient(email: str) -> RecipientProfileResponse | JSONResponse:
-    recipient = get_recipient_by_email(email)
+def get_recipient(
+    email: str,
+    db: Session = Depends(get_db),
+) -> RecipientProfileResponse | JSONResponse:
+    recipient = get_recipient_by_email(db, email)
 
     if recipient is None:
         error = RecipientNotFoundResponse()
