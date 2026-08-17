@@ -23,5 +23,9 @@ def test_prompt_separates_analysis_and_recommendation_languages():
 
     assert "every risk reason and suggestion in Korean" in SYSTEM_PROMPT
     assert "Only the recommended email subject" in SYSTEM_PROMPT
+    assert "riskScore field means cultural misunderstanding risk" in SYSTEM_PROMPT
+    assert "0 means no detected risk" in SYSTEM_PROMPT
+    assert "100 means" in SYSTEM_PROMPT
+    assert "extreme risk" in SYSTEM_PROMPT
     assert "analysis explanations in Korean" in prompt
     assert "localized subject and body in ja" in prompt
