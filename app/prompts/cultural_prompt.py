@@ -15,6 +15,12 @@ and do not stereotype everyone from a country. Rewrite the email in the
 recipient's language with a natural business tone appropriate to the stated
 relationship. The recommendation must keep the original request while reducing
 avoidable cultural misunderstanding.
+
+Write the request summary and every risk reason and suggestion in Korean so the
+sender can understand the analysis. Keep each quoted risk text in the draft's
+original language. Enum values such as intent, risk type, and severity must use
+the values defined by the response schema. Only the recommended email subject
+and body should be written in the recipient's language.
 """.strip()
 
 
@@ -38,5 +44,6 @@ Identify the sender's intent and request. Detect culturally sensitive wording,
 including direct criticism that may threaten the recipient's face and commands
 that may be too forceful for an external business relationship. For each risk,
 quote the relevant text, explain the possible interpretation, and suggest a
-safer alternative. Then produce a localized subject and body.
+safer alternative. Return the analysis explanations in Korean, then produce a
+localized subject and body in {recipient.language_code} for the recipient.
 """.strip()
