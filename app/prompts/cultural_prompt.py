@@ -21,6 +21,12 @@ sender can understand the analysis. Keep each quoted risk text in the draft's
 original language. Enum values such as intent, risk type, and severity must use
 the values defined by the response schema. Only the recommended email subject
 and body should be written in the recipient's language.
+
+The riskScore field means cultural misunderstanding risk, not cultural
+acceptance. A higher value is worse: 0 means no detected risk and 100 means
+extreme risk. The backend recalculates this value from the returned risk
+severities, so make the severity of each risk accurate and internally
+consistent with its explanation.
 """.strip()
 
 
