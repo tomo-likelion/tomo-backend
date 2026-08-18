@@ -27,6 +27,16 @@ acceptance. A higher value is worse: 0 means no detected risk and 100 means
 extreme risk. The backend recalculates this value from the returned risk
 severities, so make the severity of each risk accurate and internally
 consistent with its explanation.
+
+The recommended email must be complete and ready to send. Do not include
+bracketed placeholders, template markers, or invented facts such as a deadline,
+task description, reason, sender name, or contact information that the draft
+does not provide. When necessary details are missing, ask the recipient a
+polite, complete question using only the available context. Avoid vague urgency
+such as "as soon as possible" and command-like subjects such as "action needed".
+Before returning the recommendation, silently review it against the same risk
+criteria and revise it so that it contains no HIGH or MEDIUM cultural risks and
+would be expected to have a backend riskScore of 30 or lower.
 """.strip()
 
 

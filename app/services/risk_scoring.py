@@ -2,10 +2,12 @@ from app.schemas.email_analysis import CulturalRisk, RiskSeverity
 
 
 _SEVERITY_RISK = {
-    RiskSeverity.LOW: 0.15,
+    RiskSeverity.LOW: 0.08,
     RiskSeverity.MEDIUM: 0.35,
     RiskSeverity.HIGH: 0.65,
 }
+
+_LOW_ONLY_SCORE_CAP = 30
 
 
 def calculate_risk_score(risks: list[CulturalRisk]) -> int:
@@ -14,4 +16,8 @@ def calculate_risk_score(risks: list[CulturalRisk]) -> int:
     for risk in risks:
         remaining_safety *= 1 - _SEVERITY_RISK[risk.severity]
 
-    return round((1 - remaining_safety) * 100)
+    score = round((1 - remaining_safety) * 100)
+    if risks and all(risk.severity == RiskSeverity.LOW for risk in risks):
+        return min(score, _LOW_ONLY_SCORE_CAP)
+
+    return score
