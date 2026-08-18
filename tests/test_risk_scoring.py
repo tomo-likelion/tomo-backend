@@ -17,7 +17,7 @@ def make_risk(severity: RiskSeverity) -> CulturalRisk:
 @pytest.mark.parametrize(
     ("severity", "expected_score"),
     [
-        (RiskSeverity.LOW, 15),
+        (RiskSeverity.LOW, 8),
         (RiskSeverity.MEDIUM, 35),
         (RiskSeverity.HIGH, 65),
     ],
@@ -38,3 +38,9 @@ def test_multiple_risks_accumulate_with_diminishing_returns():
     ]
 
     assert calculate_risk_score(risks) == 85
+
+
+def test_low_only_risks_keep_acceptance_score_at_least_seventy():
+    risks = [make_risk(RiskSeverity.LOW) for _ in range(10)]
+
+    assert calculate_risk_score(risks) == 30
