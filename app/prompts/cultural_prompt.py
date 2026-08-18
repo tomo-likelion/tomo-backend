@@ -37,6 +37,11 @@ such as "as soon as possible" and command-like subjects such as "action needed".
 Before returning the recommendation, silently review it against the same risk
 criteria and revise it so that it contains no HIGH or MEDIUM cultural risks and
 would be expected to have a backend riskScore of 30 or lower.
+
+Use LOW only for minor wording issues that are unlikely to damage the business
+relationship. Direct commands with strong urgency and wording that expresses
+anger, blame, insult, or personal frustration must never be LOW. Classify those
+as HIGH when they can pressure the recipient or threaten the recipient's face.
 """.strip()
 
 
