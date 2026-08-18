@@ -1,7 +1,10 @@
 import pytest
 
 from app.schemas.email_analysis import CulturalRisk, RiskSeverity, RiskType
-from app.services.risk_scoring import calculate_risk_score
+from app.services.risk_scoring import (
+    calculate_risk_score,
+    normalize_risk_severities,
+)
 
 
 def make_risk(severity: RiskSeverity) -> CulturalRisk:
@@ -44,3 +47,54 @@ def test_low_only_risks_keep_acceptance_score_at_least_seventy():
     risks = [make_risk(RiskSeverity.LOW) for _ in range(10)]
 
     assert calculate_risk_score(risks) == 30
+
+
+def test_obvious_rude_language_is_not_treated_as_low_risk():
+    risks = [
+        CulturalRisk(
+            text="빨리좀해",
+            type=RiskType.DIRECT_COMMAND,
+            severity=RiskSeverity.LOW,
+            reason="직접적인 명령입니다.",
+            suggestion="정중하게 요청하세요.",
+        ),
+        CulturalRisk(
+            text="빨리쫌해 짜증나니까",
+            type=RiskType.FACE_THREATENING_FEEDBACK,
+            severity=RiskSeverity.LOW,
+            reason="감정적인 비난입니다.",
+            suggestion="감정 표현을 제거하세요.",
+        ),
+        CulturalRisk(
+            text="Subject: 빨리좀해",
+            type=RiskType.AMBIGUOUS_DEADLINE,
+            severity=RiskSeverity.LOW,
+            reason="기한이 모호합니다.",
+            suggestion="구체적인 일정을 요청하세요.",
+        ),
+    ]
+
+    normalize_risk_severities(risks)
+
+    assert [risk.severity for risk in risks] == [
+        RiskSeverity.HIGH,
+        RiskSeverity.HIGH,
+        RiskSeverity.MEDIUM,
+    ]
+    assert calculate_risk_score(risks) == 92
+
+
+def test_mild_low_risks_remain_low():
+    risks = [
+        CulturalRisk(
+            text="the outstanding item",
+            type=RiskType.FACE_THREATENING_FEEDBACK,
+            severity=RiskSeverity.LOW,
+            reason="표현이 다소 모호합니다.",
+            suggestion="항목을 구체화하세요.",
+        )
+    ]
+
+    normalize_risk_severities(risks)
+
+    assert risks[0].severity == RiskSeverity.LOW

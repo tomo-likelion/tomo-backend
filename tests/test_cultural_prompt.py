@@ -32,5 +32,7 @@ def test_prompt_separates_analysis_and_recommendation_languages():
     assert "bracketed placeholders" in SYSTEM_PROMPT
     assert "no HIGH or MEDIUM cultural risks" in SYSTEM_PROMPT
     assert "riskScore of 30 or lower" in SYSTEM_PROMPT
+    assert "Direct commands with strong urgency" in SYSTEM_PROMPT
+    assert "anger, blame, insult, or personal frustration" in SYSTEM_PROMPT
     assert "analysis explanations in Korean" in prompt
     assert "localized subject and body in ja" in prompt
