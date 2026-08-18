@@ -4,6 +4,10 @@ from app.core.config import get_settings
 from app.prompts.cultural_prompt import SYSTEM_PROMPT, build_analysis_prompt
 from app.schemas.email_analysis import EmailAnalysisCreateRequest, LLMAnalysisResult
 from app.schemas.recipient import RecipientProfileResponse
+from app.services.risk_scoring import (
+    calculate_risk_score,
+    normalize_risk_severities,
+)
 
 
 class LLMNotConfiguredError(Exception):
@@ -40,7 +44,10 @@ def analyze_email_with_llm(
     except OpenAIError as error:
         raise LLMAnalysisError from error
 
-    if response.output_parsed is None:
+    result = response.output_parsed
+    if result is None:
         raise LLMAnalysisError
 
-    return response.output_parsed
+    normalize_risk_severities(result.analysis.risks)
+    result.analysis.risk_score = calculate_risk_score(result.analysis.risks)
+    return result
