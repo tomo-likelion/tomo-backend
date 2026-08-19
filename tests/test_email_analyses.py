@@ -44,6 +44,10 @@ def cultural_analysis_result() -> LLMAnalysisResult:
         recommendation=EmailRecommendation(
             subject="デザイン内容のご確認と修正のお願い",
             body="お世話になっております。修正をご検討いただけますでしょうか。",
+            korean_subject="디자인 내용 확인 및 수정 요청",
+            korean_body=(
+                "안녕하세요. 수정을 검토해 주실 수 있을지 문의드립니다."
+            ),
         ),
     )
 
@@ -84,6 +88,10 @@ def test_create_email_analysis_returns_cultural_risk_and_recommendation(
     assert result["recommendation"]["subject"] == (
         "デザイン内容のご確認と修正のお願い"
     )
+    assert result["recommendation"]["koreanSubject"] == (
+        "디자인 내용 확인 및 수정 요청"
+    )
+    assert result["recommendation"]["koreanBody"].startswith("안녕하세요")
     assert result["createdAt"]
 
 
@@ -118,6 +126,10 @@ def test_get_email_analysis_returns_saved_detail(
         "FACE_THREATENING_FEEDBACK"
     )
     assert result["rewrittenSubject"] == "デザイン内容のご確認と修正のお願い"
+    assert result["koreanRewrittenSubject"] == (
+        "디자인 내용 확인 및 수정 요청"
+    )
+    assert result["koreanRewrittenBody"].startswith("안녕하세요")
 
 
 def test_get_email_analysis_returns_404_for_unknown_id():

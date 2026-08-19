@@ -74,6 +74,8 @@ def _to_detail_response(record: EmailAnalysisRecord) -> EmailAnalysisDetailRespo
         risk_result=AnalysisRiskResult(risks=record.analysis.risks),
         rewritten_subject=record.recommendation.subject,
         rewritten_body=record.recommendation.body,
+        korean_rewritten_subject=record.recommendation.korean_subject,
+        korean_rewritten_body=record.recommendation.korean_body,
         created_at=record.created_at,
     )
 

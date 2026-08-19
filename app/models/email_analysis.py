@@ -27,6 +27,10 @@ class EmailAnalysis(Base):
     risk_result: Mapped[dict[str, Any]] = mapped_column(JSON)
     rewritten_subject: Mapped[str] = mapped_column(String(255))
     rewritten_body: Mapped[str] = mapped_column(Text)
+    korean_rewritten_subject: Mapped[str | None] = mapped_column(
+        String(255), nullable=True
+    )
+    korean_rewritten_body: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

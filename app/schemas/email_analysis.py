@@ -57,8 +57,12 @@ class AnalysisResult(BaseModel):
 
 
 class EmailRecommendation(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, serialize_by_alias=True)
+
     subject: str
     body: str
+    korean_subject: str = Field(alias="koreanSubject")
+    korean_body: str = Field(alias="koreanBody")
 
 
 class LLMAnalysisResult(BaseModel):
@@ -104,6 +108,8 @@ class EmailAnalysisDetailResponse(BaseModel):
     risk_result: AnalysisRiskResult = Field(alias="riskResult")
     rewritten_subject: str = Field(alias="rewrittenSubject")
     rewritten_body: str = Field(alias="rewrittenBody")
+    korean_rewritten_subject: str = Field(alias="koreanRewrittenSubject")
+    korean_rewritten_body: str = Field(alias="koreanRewrittenBody")
     created_at: datetime = Field(alias="createdAt")
 
 
