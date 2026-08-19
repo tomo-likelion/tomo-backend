@@ -70,6 +70,8 @@ def save_analysis(
         },
         rewritten_subject=llm_result.recommendation.subject,
         rewritten_body=llm_result.recommendation.body,
+        korean_rewritten_subject=llm_result.recommendation.korean_subject,
+        korean_rewritten_body=llm_result.recommendation.korean_body,
     )
     db.add(saved_analysis)
     db.commit()
@@ -119,6 +121,8 @@ def _to_record(analysis: EmailAnalysis) -> EmailAnalysisRecord:
         recommendation=EmailRecommendation(
             subject=analysis.rewritten_subject,
             body=analysis.rewritten_body,
+            korean_subject=analysis.korean_rewritten_subject or "",
+            korean_body=analysis.korean_rewritten_body or "",
         ),
         created_at=analysis.created_at,
     )
